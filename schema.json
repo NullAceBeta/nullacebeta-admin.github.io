@@ -1,0 +1,45 @@
+{
+  "header": {
+    "name": "string",
+    "email": "string",
+    "phoneNumber": "string",
+    "location": "string",
+    "goalLife": "string",
+    "photoUrl": "string (Cloudinary URL)",
+    "socialNetwork": [
+      { "id": "string", "platform": "string", "url": "string", "icon": "string" }
+    ]
+  },
+  "education": [
+    {
+      "id": "string",
+      "degree": "string",
+      "university": "string",
+      "startDate": "string (YYYY-MM)",
+      "endDate": "string (YYYY-MM | 'present')"
+    }
+  ],
+  "work-experience": [
+    {
+      "id": "string",
+      "company": "string",
+      "position": "string",
+      "location": "string",
+      "startDate": "string (YYYY-MM)",
+      "endDate": "string (YYYY-MM | 'present')",
+      "accomplishments": ["string"]
+    }
+  ],
+  "skills": [
+    { "id": "string", "name": "string", "percentaje": "number (0-100)" }
+  ],
+  "certificates": [
+    { "id": "string", "title": "string", "description": "string", "year": "string" }
+  ],
+  "languages": [
+    { "id": "string", "name": "string", "level": "string", "certification": "string" }
+  ],
+  "interests": [
+    { "id": "string", "name": "string" }
+  ]
+}

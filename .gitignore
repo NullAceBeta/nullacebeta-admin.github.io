@@ -1,0 +1,6 @@
+# Secretos y variables de entorno
+backend/serviceAccountKey.json
+backend/.env
+
+# Dependencias 
+backend/node_modules/
