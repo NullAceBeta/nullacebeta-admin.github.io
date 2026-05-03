@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2330;
+    --border2: #2a3045;
+    --accent: #5b8cff;
+    --accent2: #3dffc0;
+    --danger: #ff4757;
+    --warn: #ffa94d;
+    --text: #c8d0e8;
+    --text2: #6b7899;
+    --text3: #3a4260;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+    --radius: 6px;
+    --transition: 140ms ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-title {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text2);
+    margin-top: 2px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  nav { padding: 12px 0; flex: 1; overflow-y: auto; }
+
+  .nav-section {
+    padding: 8px 16px 4px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    color: var(--text2);
+    transition: color var(--transition), background var(--transition);
+    border-left: 2px solid transparent;
+    font-size: 12px;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: rgba(91,140,255,0.06);
+  }
+  .nav-item .icon { font-size: 14px; width: 18px; text-align: center; }
+
+  /* API Config at bottom */
+  .api-config {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .api-config label { font-size: 10px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .api-config input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 7px 10px;
+    border-radius: var(--radius);
+    outline: none;
+  }
+  .api-config input:focus { border-color: var(--accent); }
+
+  /* ── MAIN ── */
+  #main {
+    margin-left: 220px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  header.topbar {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .page-title { font-family: var(--sans); font-size: 20px; font-weight: 800; color: #fff; }
+  .page-path { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ── SECTIONS ── */
+  .section { display: none; padding: 28px; }
+  .section.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+  .card-title { font-family: var(--sans); font-size: 13px; font-weight: 600; color: #fff; }
+  .card-body { padding: 18px; }
+
+  /* ── GRID ── */
+  .items-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .item-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    animation: fadeIn 200ms ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+
+  .item-content { flex: 1; min-width: 0; }
+  .item-primary { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-secondary { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .item-tag {
+    display: inline-block;
+    background: rgba(91,140,255,0.12);
+    color: var(--accent);
+    border-radius: 3px;
+    padding: 1px 7px;
+    font-size: 10px;
+    margin-top: 4px;
+  }
+
+  .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #4a78f0; }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid transparent; padding: 6px 8px; }
+  .btn-danger:hover { background: rgba(255,71,87,0.1); border-color: rgba(255,71,87,0.3); }
+  .btn-edit { background: transparent; color: var(--text2); border: 1px solid transparent; padding: 6px 8px; }
+  .btn-edit:hover { color: var(--accent2); background: rgba(61,255,192,0.08); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* ── FORM ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid.single { grid-template-columns: 1fr; }
+  .form-full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 10px; color: var(--text2); letter-spacing: 1.2px; text-transform: uppercase; }
+  .field input, .field textarea, .field select {
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 9px 12px;
+    border-radius: var(--radius);
+    outline: none;
+    width: 100%;
+    transition: border-color var(--transition);
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select option { background: var(--surface); }
+
+  /* Range input */
+  .range-wrap { display: flex; align-items: center; gap: 10px; }
+  .range-wrap input[type=range] { flex: 1; accent-color: var(--accent); }
+  .range-val { font-size: 13px; color: var(--accent); width: 36px; text-align: right; }
+
+  /* Accomplishments list */
+  .accom-list { display: flex; flex-direction: column; gap: 6px; }
+  .accom-item { display: flex; gap: 6px; }
+  .accom-item input { flex: 1; }
+  .accom-add { margin-top: 4px; }
+
+  /* ── MODAL ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    width: 90%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 200ms ease;
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+
+  .modal-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title { font-family: var(--sans); font-size: 15px; font-weight: 700; color: #fff; }
+  .modal-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px; }
+  .modal-close:hover { color: var(--danger); }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* ── TOAST ── */
+  #toast-container {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    font-size: 12px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastIn 200ms ease;
+    min-width: 220px;
+  }
+  .toast.success { border-left: 3px solid var(--accent2); }
+  .toast.error { border-left: 3px solid var(--danger); }
+  @keyframes toastIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+
+  /* ── PHOTO PREVIEW ── */
+  .photo-preview {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border2);
+    margin-top: 8px;
+    display: block;
+  }
+  .photo-placeholder {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px dashed var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-top: 8px;
+    color: var(--text3);
+  }
+
+  /* ── SKILL BAR ── */
+  .skill-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; margin-top: 4px; }
+  .skill-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 300ms ease; }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+    font-size: 12px;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    #sidebar { width: 100%; min-height: auto; position: relative; flex-direction: row; flex-wrap: wrap; }
+    #main { margin-left: 0; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside id="sidebar">
+  <div class="logo">
+    <div class="logo-title">Portfolio<span style="color:var(--accent)">.</span>Admin</div>
+    <div class="logo-sub">Control Panel</div>
+  </div>
+  <nav>
+    <div class="nav-section">Perfil</div>
+    <div class="nav-item active" data-section="header"><span class="icon">👤</span> Header</div>
+    <div class="nav-section">Contenido</div>
+    <div class="nav-item" data-section="education"><span class="icon">🎓</span> Educación</div>
+    <div class="nav-item" data-section="work-experience"><span class="icon">💼</span> Experiencia</div>
+    <div class="nav-item" data-section="skills"><span class="icon">⚡</span> Habilidades</div>
+    <div class="nav-item" data-section="certificates"><span class="icon">📜</span> Certificados</div>
+    <div class="nav-item" data-section="languages"><span class="icon">🌐</span> Idiomas</div>
+    <div class="nav-item" data-section="interests"><span class="icon">✦</span> Intereses</div>
+  </nav>
+  <div class="api-config">
+    <label>API Base URL</label>
+    <input type="text" id="apiBase" value="http://localhost:3000/api" placeholder="https://tu-api.render.com/api">
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main id="main">
+  <header class="topbar">
+    <div>
+      <div class="page-title" id="pageTitleEl">Header</div>
+      <div class="page-path" id="pagePathEl">portfolio / header</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" id="addBtn">+ Agregar</button>
+    </div>
+  </header>
+
+  <!-- ── HEADER SECTION ── -->
+  <div class="section active" id="section-header">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Información Personal</span>
+        <button class="btn btn-primary btn-sm" onclick="saveHeader()">💾 Guardar</button>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+          <div>
+            <div id="photoPreview" class="photo-placeholder">👤</div>
+          </div>
+          <div style="flex:1;min-width:260px;">
+            <div class="form-grid">
+              <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="h-name" placeholder="Tu nombre completo">
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input type="email" id="h-email" placeholder="email@ejemplo.com">
+              </div>
+              <div class="field">
+                <label>Teléfono</label>
+                <input type="text" id="h-phone" placeholder="+52 999 000 0000">
+              </div>
+              <div class="field">
+                <label>Ubicación</label>
+                <input type="text" id="h-location" placeholder="Ciudad, País">
+              </div>
+              <div class="field form-full">
+                <label>Objetivo / Meta de vida</label>
+                <textarea id="h-goal" placeholder="Describe tu objetivo profesional..."></textarea>
+              </div>
+              <div class="field form-full">
+                <label>Photo URL (Cloudinary)</label>
+                <input type="url" id="h-photo" placeholder="https://res.cloudinary.com/..." oninput="previewPhoto(this.value)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Redes Sociales</span>
+        <button class="btn btn-primary btn-sm" onclick="openModal('social')">+ Agregar</button>
+      </div>
+      <div class="card-body">
+        <div class="items-grid" id="social-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EDUCATION ── -->
+  <div class="section" id="section-education">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Educación</span></div>
+      <div class="card-body"><div class="items-grid" id="education-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ── WORK EXPERIENCE ── -->
+  <div class="section" id="section-work-experience">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Experiencia Laboral</span></div>
+      <div class="card-body"><div class="items-grid" id="work-experience-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ── SKILLS ── -->
+  <div class="section" id="section-skills">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Habilidades</span></div>
+      <div class="card-body"><div class="items-grid" id="skills-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ── CERTIFICATES ── -->
+  <div class="section" id="section-certificates">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Certificados</span></div>
+      <div class="card-body"><div class="items-grid" id="certificates-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ── LANGUAGES ── -->
+  <div class="section" id="section-languages">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Idiomas</span></div>
+      <div class="card-body"><div class="items-grid" id="languages-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ── INTERESTS ── -->
+  <div class="section" id="section-interests">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Intereses</span></div>
+      <div class="card-body"><div class="items-grid" id="interests-list"></div></div>
+    </div>
+  </div>
+</main>
+
+<!-- ── MODAL ── -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Agregar ítem</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="modalSaveBtn" onclick="saveModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ── -->
+<div id="toast-container"></div>
+
+<script>
+// ── STATE ──
+let currentSection = 'header';
+let modalType = null;
+let editingId = null;
+
+const API = () => document.getElementById('apiBase').value.replace(/\/$/, '');
+
+// ── NAVIGATION ──
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    const sec = el.dataset.section;
+    navigate(sec);
+  });
+});
+
+function navigate(sec) {
+  currentSection = sec;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === sec));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === `section-${sec}`));
+  document.getElementById('pageTitleEl').textContent = el_label(sec);
+  document.getElementById('pagePathEl').textContent = `portfolio / ${sec}`;
+
+  const addBtn = document.getElementById('addBtn');
+  addBtn.style.display = sec === 'header' ? 'none' : 'inline-flex';
+  addBtn.onclick = () => openModal(sec);
+
+  if (sec !== 'header') loadList(sec);
+  else loadHeader();
+}
+
+function el_label(s) {
+  return { header:'Header', education:'Educación', 'work-experience':'Experiencia', skills:'Habilidades', certificates:'Certificados', languages:'Idiomas', interests:'Intereses' }[s] || s;
+}
+
+// ── API HELPERS ──
+async function apiFetch(path, options = {}) {
+  const res = await fetch(`${API()}${path}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+// ── TOAST ──
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type === 'success' ? '✓' : '✕'}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ── PHOTO PREVIEW ──
+function previewPhoto(url) {
+  const el = document.getElementById('photoPreview');
+  if (url) {
+    el.outerHTML = `<img src="${url}" class="photo-preview" id="photoPreview" onerror="this.outerHTML='<div class=\\'photo-placeholder\\' id=\\'photoPreview\\'>👤</div>'">`;
+  } else {
+    el.innerHTML = '👤';
+  }
+}
+
+// ── HEADER ──
+async function loadHeader() {
+  try {
+    const data = await apiFetch('/header');
+    document.getElementById('h-name').value = data.name || '';
+    document.getElementById('h-email').value = data.email || '';
+    document.getElementById('h-phone').value = data.phoneNumber || '';
+    document.getElementById('h-location').value = data.location || '';
+    document.getElementById('h-goal').value = data.goalLife || '';
+    document.getElementById('h-photo').value = data.photoUrl || '';
+    previewPhoto(data.photoUrl || '');
+    renderSocialList(data.socialNetwork || []);
+  } catch(e) { toast('Error cargando header: ' + e.message, 'error'); }
+}
+
+async function saveHeader() {
+  try {
+    await apiFetch('/header', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: document.getElementById('h-name').value,
+        email: document.getElementById('h-email').value,
+        phoneNumber: document.getElementById('h-phone').value,
+        location: document.getElementById('h-location').value,
+        goalLife: document.getElementById('h-goal').value,
+        photoUrl: document.getElementById('h-photo').value,
+      }),
+    });
+    toast('Header guardado correctamente');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function renderSocialList(items) {
+  const el = document.getElementById('social-list');
+  if (!items.length) { el.innerHTML = emptyState('No hay redes sociales'); return; }
+  el.innerHTML = items.map(s => `
+    <div class="item-row">
+      <div class="item-content">
+        <div class="item-primary">${s.platform || '—'} <span class="item-tag">${s.icon || ''}</span></div>
+        <div class="item-secondary">${s.url || ''}</div>
+      </div>
+      <div class="item-actions">
+        <button class="btn btn-edit" onclick="openModal('social','${s.id}')">✎</button>
+        <button class="btn btn-danger" onclick="deleteSocial('${s.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+async function deleteSocial(id) {
+  if (!confirm('¿Eliminar esta red social?')) return;
+  try {
+    await apiFetch(`/header/social/${id}`, { method: 'DELETE' });
+    toast('Eliminado'); loadHeader();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── LIST LOADER ──
+async function loadList(section) {
+  try {
+    const items = await apiFetch(`/${section}`);
+    renderList(section, items);
+  } catch(e) { toast('Error cargando ' + section + ': ' + e.message, 'error'); }
+}
+
+function emptyState(msg = 'Sin ítems') {
+  return `<div class="empty"><div class="empty-icon">○</div>${msg}<br><small style="color:var(--text3)">Usa el botón "Agregar" para añadir</small></div>`;
+}
+
+function renderList(section, items) {
+  const el = document.getElementById(`${section}-list`);
+  if (!items.length) { el.innerHTML = emptyState(); return; }
+
+  el.innerHTML = items.map(item => {
+    let primary = '', secondary = '', extra = '';
+    switch(section) {
+      case 'education':
+        primary = item.degree || '—';
+        secondary = item.university + (item.startDate ? ` · ${item.startDate} → ${item.endDate || 'presente'}` : '');
+        break;
+      case 'work-experience':
+        primary = item.position || '—';
+        secondary = item.company + (item.location ? ` · ${item.location}` : '') + (item.startDate ? ` · ${item.startDate} → ${item.endDate || 'presente'}` : '');
+        extra = item.accomplishments?.length ? `<div style="font-size:10px;color:var(--text3);margin-top:4px;">${item.accomplishments.length} logros</div>` : '';
+        break;
+      case 'skills':
+        primary = item.name || '—';
+        extra = `<div class="skill-bar-wrap"><div class="skill-bar-fill" style="width:${item.percentaje||0}%"></div></div>`;
+        secondary = `${item.percentaje || 0}%`;
+        break;
+      case 'certificates':
+        primary = item.title || '—';
+        secondary = (item.year || '') + (item.description ? ` · ${item.description.substring(0,60)}...` : '');
+        break;
+      case 'languages':
+        primary = item.name || '—';
+        secondary = item.level + (item.certification ? ` · ${item.certification}` : '');
+        break;
+      case 'interests':
+        primary = item.name || '—';
+        break;
+    }
+    return `
+      <div class="item-row">
+        <div class="item-content">
+          <div class="item-primary">${primary}</div>
+          ${secondary ? `<div class="item-secondary">${secondary}</div>` : ''}
+          ${extra}
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-edit" onclick="openModal('${section}','${item.id}')">✎</button>
+          <button class="btn btn-danger" onclick="deleteItem('${section}','${item.id}')">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function deleteItem(section, id) {
+  if (!confirm('¿Eliminar este ítem?')) return;
+  try {
+    await apiFetch(`/${section}/${id}`, { method: 'DELETE' });
+    toast('Eliminado'); loadList(section);
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ── MODAL ──
+const FORMS = {
+  social: (d={}) => `
+    <div class="form-grid">
+      <div class="field"><label>Plataforma</label><input id="f-platform" value="${d.platform||''}" placeholder="LinkedIn, GitHub..."></div>
+      <div class="field"><label>Icono (emoji/clase)</label><input id="f-icon" value="${d.icon||''}" placeholder="🔗"></div>
+      <div class="field form-full"><label>URL</label><input id="f-url" value="${d.url||''}" placeholder="https://..."></div>
+    </div>`,
+
+  education: (d={}) => `
+    <div class="form-grid">
+      <div class="field form-full"><label>Título / Grado</label><input id="f-degree" value="${d.degree||''}" placeholder="Ingeniería en Sistemas..."></div>
+      <div class="field form-full"><label>Universidad / Institución</label><input id="f-university" value="${d.university||''}" placeholder="UNAM, TEC..."></div>
+      <div class="field"><label>Fecha Inicio (YYYY-MM)</label><input id="f-startDate" value="${d.startDate||''}" placeholder="2019-08"></div>
+      <div class="field"><label>Fecha Fin</label><input id="f-endDate" value="${d.endDate||''}" placeholder="2023-06 o present"></div>
+    </div>`,
+
+  'work-experience': (d={}) => `
+    <div class="form-grid">
+      <div class="field"><label>Puesto</label><input id="f-position" value="${d.position||''}" placeholder="Desarrollador Full Stack"></div>
+      <div class="field"><label>Empresa</label><input id="f-company" value="${d.company||''}" placeholder="Google, Startup..."></div>
+      <div class="field"><label>Ubicación</label><input id="f-location" value="${d.location||''}" placeholder="Ciudad, País / Remoto"></div>
+      <div class="field" style="opacity:0"></div>
+      <div class="field"><label>Fecha Inicio</label><input id="f-startDate" value="${d.startDate||''}" placeholder="2022-01"></div>
+      <div class="field"><label>Fecha Fin</label><input id="f-endDate" value="${d.endDate||''}" placeholder="2024-03 o present"></div>
+      <div class="field form-full">
+        <label>Logros</label>
+        <div class="accom-list" id="accom-list">
+          ${(d.accomplishments||['']).map((a,i)=>`
+            <div class="accom-item">
+              <input value="${a}" placeholder="Logro ${i+1}..." class="accom-input">
+              <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>
+            </div>`).join('')}
+        </div>
+        <button class="btn btn-ghost btn-sm accom-add" onclick="addAccom()">+ Logro</button>
+      </div>
+    </div>`,
+
+  skills: (d={}) => `
+    <div class="form-grid single">
+      <div class="field"><label>Nombre</label><input id="f-name" value="${d.name||''}" placeholder="React, Python..."></div>
+      <div class="field">
+        <label>Porcentaje</label>
+        <div class="range-wrap">
+          <input type="range" id="f-percentaje" min="0" max="100" value="${d.percentaje||50}" oninput="document.getElementById('f-pct-val').textContent=this.value">
+          <span class="range-val" id="f-pct-val">${d.percentaje||50}</span>
+        </div>
+      </div>
+    </div>`,
+
+  certificates: (d={}) => `
+    <div class="form-grid single">
+      <div class="field"><label>Título</label><input id="f-title" value="${d.title||''}" placeholder="AWS Certified..."></div>
+      <div class="field"><label>Año</label><input id="f-year" value="${d.year||''}" placeholder="2024"></div>
+      <div class="field"><label>Descripción</label><textarea id="f-description" placeholder="Descripción del certificado...">${d.description||''}</textarea></div>
+    </div>`,
+
+  languages: (d={}) => `
+    <div class="form-grid">
+      <div class="field"><label>Idioma</label><input id="f-name" value="${d.name||''}" placeholder="Inglés, Francés..."></div>
+      <div class="field">
+        <label>Nivel</label>
+        <select id="f-level">
+          ${['A1','A2','B1','B2','C1','C2','Nativo'].map(l=>`<option ${d.level===l?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field form-full"><label>Certificación</label><input id="f-certification" value="${d.certification||''}" placeholder="TOEFL, IELTS (opcional)"></div>
+    </div>`,
+
+  interests: (d={}) => `
+    <div class="form-grid single">
+      <div class="field"><label>Interés</label><input id="f-name" value="${d.name||''}" placeholder="Fotografía, Montañismo..."></div>
+    </div>`,
+};
+
+const COLLECTORS = {
+  social: () => ({ platform: v('f-platform'), icon: v('f-icon'), url: v('f-url') }),
+  education: () => ({ degree: v('f-degree'), university: v('f-university'), startDate: v('f-startDate'), endDate: v('f-endDate') }),
+  'work-experience': () => ({
+    position: v('f-position'), company: v('f-company'), location: v('f-location'),
+    startDate: v('f-startDate'), endDate: v('f-endDate'),
+    accomplishments: [...document.querySelectorAll('.accom-input')].map(i=>i.value).filter(Boolean),
+  }),
+  skills: () => ({ name: v('f-name'), percentaje: parseInt(v('f-percentaje')) }),
+  certificates: () => ({ title: v('f-title'), year: v('f-year'), description: v('f-description') }),
+  languages: () => ({ name: v('f-name'), level: document.getElementById('f-level')?.value, certification: v('f-certification') }),
+  interests: () => ({ name: v('f-name') }),
+};
+
+function v(id) { return document.getElementById(id)?.value || ''; }
+
+let _currentItems = [];
+
+async function openModal(type, id = null) {
+  modalType = type;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = id ? `Editar ${el_label(type)}` : `Agregar ${el_label(type)}`;
+
+  let data = {};
+  if (id) {
+    if (type === 'social') {
+      try {
+        const h = await apiFetch('/header');
+        data = (h.socialNetwork||[]).find(s=>s.id===id) || {};
+      } catch(e) {}
+    } else {
+      try {
+        const items = await apiFetch(`/${type}`);
+        data = items.find(i=>i.id===id) || {};
+      } catch(e) {}
+    }
+  }
+
+  document.getElementById('modalBody').innerHTML = FORMS[type](data);
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  modalType = null; editingId = null;
+}
+
+function addAccom() {
+  const list = document.getElementById('accom-list');
+  const div = document.createElement('div');
+  div.className = 'accom-item';
+  div.innerHTML = `<input placeholder="Nuevo logro..." class="accom-input"><button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(div);
+}
+
+async function saveModal() {
+  const body = COLLECTORS[modalType]?.();
+  if (!body) return;
+
+  try {
+    if (modalType === 'social') {
+      if (editingId) await apiFetch(`/header/social/${editingId}`, { method: 'PUT', body: JSON.stringify(body) });
+      else await apiFetch('/header/social', { method: 'POST', body: JSON.stringify(body) });
+      toast('Red social guardada'); closeModal(); loadHeader();
+    } else {
+      if (editingId) await apiFetch(`/${modalType}/${editingId}`, { method: 'PUT', body: JSON.stringify(body) });
+      else await apiFetch(`/${modalType}`, { method: 'POST', body: JSON.stringify(body) });
+      toast('Guardado correctamente'); closeModal(); loadList(modalType);
+    }
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// Close on backdrop click
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── INIT ──
+loadHeader();
+</script>
+</body>
+</html>
